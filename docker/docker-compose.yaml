@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   postgres:
-    image: postgres:16
+    image: postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -12,40 +12,27 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - webnet
+      - project-net
 
   api:
     build:
-      context: ./backend
+      context: ../backend
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       DATABASE_HOST: postgres
-      DATABASE_PORT: "5432"
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: clubs
     depends_on:
       - postgres
     networks:
-      - webnet
-
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
+      - project-net
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - webnet
+      - "12000:3000"
+
+networks:
+  project-net:
 
 volumes:
   postgres_data:
-  caddy_data:
-  caddy_config:
-
-networks:
-  webnet:
