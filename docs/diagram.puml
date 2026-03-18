@@ -1,0 +1,56 @@
+@startuml
+left to right direction
+
+entity User {
+  id : number <<PK>>
+  username : string
+  email : string
+  password : string
+}
+
+entity Booking {
+  id : number <<PK>>
+  date : string
+  startTime : string
+  hours : number
+}
+
+entity Club {
+  id : number <<PK>>
+  name : string
+  address : string
+}
+
+entity Seat {
+  id : number <<PK>>
+  number : number
+  os : string
+  price : int
+  occupied : boolean
+}
+
+entity Computer {
+  id : number <<PK>>
+  cpu : string
+  ram : string
+  gpu : string
+}
+
+entity AdditionalService {
+  id : number <<PK>>
+  name : string
+  description : string
+  price : int
+}
+
+' relations
+User ||--o{ Booking
+Club ||--o{ Booking
+Club ||--o{ Seat
+
+Booking }o--o{ Seat
+Booking }o--o{ AdditionalService
+
+Seat ||--|| Computer
+
+@enduml

@@ -10,6 +10,7 @@ import {
 import { User } from "../../users/entities/user.entity";
 import { Club } from "../../clubs/entities/club.entity";
 import { Seat } from "../../seats/entities/seat.entity";
+import { AdditionalService } from "src/additionals/entities/additional.entity";
 
 @Entity()
 export class Booking {
@@ -35,5 +36,9 @@ export class Booking {
   @ManyToMany(() => Seat)
   @JoinTable()
   seats: Seat[];
+
+  @ManyToMany(() => AdditionalService)
+  @JoinTable()
+  services: AdditionalService[];
 
 }

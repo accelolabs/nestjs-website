@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from "typeorm";
 import { Club } from "../../clubs/entities/club.entity";
+import { Computer } from "src/computers/entities/computer.entity";
 
 @Entity()
 export class Seat {
@@ -21,5 +22,8 @@ export class Seat {
 
   @ManyToOne(() => Club, club => club.seats, { onDelete: "CASCADE" })
   club: Club;
+
+  @OneToOne(() => Computer, computer => computer.seat)
+  computer: Computer;
 
 }

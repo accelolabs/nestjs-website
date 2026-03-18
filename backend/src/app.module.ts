@@ -6,6 +6,8 @@ import { ClubsModule } from './clubs/clubs.module';
 import { SeatsModule } from './seats/seats.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ComputersModule } from './computers/computers.module';
+import { AdditionalsModule } from './additionals/additionals.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ClubsModule,
     SeatsModule,
     BookingsModule,
+    ComputersModule,
+    AdditionalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
