@@ -6,21 +6,16 @@ import { ClubsModule } from './clubs/clubs.module';
 import { SeatsModule } from './seats/seats.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-
     TypeOrmModule.forRoot({
       type: "postgres",
-      host: process.env.DATABASE_HOST,
+      host: process.env.DATABASE_HOST || "localhost",
       port: 5432,
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
+      username: process.env.DATABASE_USER || "postgres",
+      password: process.env.DATABASE_PASSWORD || "postgres",
+      database: process.env.DATABASE_NAME || "clubs",
       autoLoadEntities: true,
       synchronize: true,
     }),
