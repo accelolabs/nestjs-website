@@ -4,6 +4,7 @@ import { Computer } from "src/computers/entities/computer.entity";
 
 @Entity()
 export class Seat {
+
   @PrimaryGeneratedColumn()
   id: number;
 

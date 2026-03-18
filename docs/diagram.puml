@@ -24,7 +24,6 @@ entity Club {
 entity Seat {
   id : number <<PK>>
   number : number
-  os : string
   price : int
   occupied : boolean
 }
@@ -34,6 +33,7 @@ entity Computer {
   cpu : string
   ram : string
   gpu : string
+  os : string
 }
 
 entity AdditionalService {
@@ -43,7 +43,7 @@ entity AdditionalService {
   price : int
 }
 
-' relations
+' Relations
 User ||--o{ Booking
 Club ||--o{ Booking
 Club ||--o{ Seat

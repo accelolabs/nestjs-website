@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "ty
 
 @Entity()
 export class Computer {
+
   @PrimaryGeneratedColumn()
   id: number;
 
