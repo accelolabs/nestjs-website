@@ -6,9 +6,14 @@ import { ClubsModule } from './clubs/clubs.module';
 import { SeatsModule } from './seats/seats.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
     TypeOrmModule.forRoot({
       type: "postgres",
       host: process.env.DATABASE_HOST,

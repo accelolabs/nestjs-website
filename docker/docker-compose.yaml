@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   postgres:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -17,7 +17,7 @@ services:
   api:
     build:
       context: ../backend
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     restart: unless-stopped
     environment:
       DATABASE_HOST: postgres
