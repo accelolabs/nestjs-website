@@ -1,1 +1,4 @@
-export class CreateClubDto {}
+export class CreateClubDto {
+  name: string;
+  address: string;
+}

@@ -4,15 +4,11 @@ import { Computer } from "src/computers/entities/computer.entity";
 
 @Entity()
 export class Seat {
-
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   number: number;
-
-  @Column()
-  os: string;
 
   @Column("int")
   price: number;
@@ -20,7 +16,7 @@ export class Seat {
   @Column({ default: false })
   occupied: boolean;
 
-  @ManyToOne(() => Club, club => club.seats, { onDelete: "CASCADE" })
+  @ManyToOne(() => Club, club => club.seats)
   club: Club;
 
   @OneToOne(() => Computer, computer => computer.seat)

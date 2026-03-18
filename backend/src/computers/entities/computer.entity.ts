@@ -3,7 +3,6 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "ty
 
 @Entity()
 export class Computer {
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -15,6 +14,9 @@ export class Computer {
 
   @Column()
   gpu: string;
+
+  @Column()
+  os: string;
 
   @OneToOne(() => Seat)
   @JoinColumn()
