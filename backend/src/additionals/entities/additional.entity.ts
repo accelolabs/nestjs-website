@@ -16,7 +16,7 @@ export class AdditionalService {
   @Column("int")
   price: number;
 
-  @ManyToMany(() => Booking, booking => booking.services)
+  @ManyToMany(() => Booking, booking => booking.additionalServices)
   bookings: Booking[];
 
 }

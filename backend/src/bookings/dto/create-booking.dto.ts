@@ -1,9 +1,7 @@
 export class CreateBookingDto {
-  userId?: number;
-  clubId?: number;
-  seatIds?: number[];
-  additionalIds?: number[];
+  clubId: number;
+  seatIds: number[];
+  additionalServiceIds?: number[];
   date: string;
   startTime: string;
-  hours: number;
 }

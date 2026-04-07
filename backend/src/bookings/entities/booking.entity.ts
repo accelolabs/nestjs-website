@@ -4,13 +4,16 @@ import {
   Column,
   ManyToOne,
   ManyToMany,
-  JoinTable
+  JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 
 import { User } from "../../users/entities/user.entity";
 import { Club } from "../../clubs/entities/club.entity";
 import { Seat } from "../../seats/entities/seat.entity";
 import { AdditionalService } from "src/additionals/entities/additional.entity";
+import { BookingStatus } from "../enums/booking-status.enum";
 
 @Entity()
 export class Booking {
@@ -30,15 +33,28 @@ export class Booking {
   @Column()
   startTime: string;
 
-  @Column()
-  hours: number;
+  @Column({
+    type: 'enum',
+    enum: BookingStatus,
+    default: BookingStatus.ACTIVE,
+  })
+  status: BookingStatus;
+
+  @Column('int', { default: 0 })
+  totalPrice: number;
 
   @ManyToMany(() => Seat)
   @JoinTable()
   seats: Seat[];
 
-  @ManyToMany(() => AdditionalService)
+  @ManyToMany(() => AdditionalService, service => service.bookings)
   @JoinTable()
-  services: AdditionalService[];
+  additionalServices: AdditionalService[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
 }
