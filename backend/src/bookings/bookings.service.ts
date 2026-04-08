@@ -99,6 +99,12 @@ export class BookingsService {
     }
 
     const totalPrice = this.calculateTotalPrice(seats, additionalServices);
+    const userBalance = user.balance ?? 0;
+    if (userBalance < totalPrice) {
+      throw new BadRequestException('Insufficient balance');
+    }
+    user.balance = userBalance - totalPrice;
+    await this.userRepo.save(user);
 
     const booking = this.repo.create({
       user,
@@ -133,6 +139,8 @@ export class BookingsService {
 
     booking.status = BookingStatus.CANCELLED;
     await this.repo.save(booking);
+    booking.user.balance = (booking.user.balance ?? 0) + booking.totalPrice;
+    await this.userRepo.save(booking.user);
     this.invalidateAvailableSeatsCache();
 
     return this.findBookingById(id, {
@@ -199,6 +207,42 @@ export class BookingsService {
     return availableSeats;
   }
 
+  async findAvailableSlots(clubId: string, date: string) {
+    this.assertValidDate(date);
+
+    const club = await this.clubRepo.findOne({
+      where: { id: clubId },
+      relations: ['seats'],
+    });
+    if (!club) {
+      throw new NotFoundException(`Club ${clubId} not found`);
+    }
+
+    const slotHours = this.generateSlotHours();
+    const availableSlots: string[] = [];
+    const now = new Date();
+    const seatIds = club.seats.map((seat) => seat.id);
+
+    for (const startTime of slotHours) {
+      const slotDate = new Date(`${date}T${startTime}:00`);
+      if (Number.isNaN(slotDate.getTime()) || slotDate <= now) {
+        continue;
+      }
+
+      const conflictingSeatIds = await this.findConflictingSeatIds(
+        seatIds,
+        date,
+        startTime,
+      );
+
+      if (conflictingSeatIds.length < seatIds.length) {
+        availableSlots.push(startTime);
+      }
+    }
+
+    return availableSlots;
+  }
+
   private async ensureUserExists(userId: string) {
     const user = await this.userRepo.findOneBy({ id: userId });
     if (!user) {
@@ -237,6 +281,13 @@ export class BookingsService {
 
     if (bookingDate <= new Date()) {
       throw new BadRequestException('Bookings are allowed only for future time slots');
+    }
+  }
+
+  private assertValidDate(date: string) {
+    const parsedDate = new Date(`${date}T00:00:00`);
+    if (Number.isNaN(parsedDate.getTime())) {
+      throw new BadRequestException('Invalid booking date');
     }
   }
 
@@ -348,5 +399,18 @@ export class BookingsService {
       return 30_000;
     }
     return ttl;
+  }
+
+  private generateSlotHours() {
+    const startHour = Number(process.env.BOOKING_DAY_START_HOUR ?? 8);
+    const endHour = Number(process.env.BOOKING_DAY_END_HOUR ?? 23);
+    const hours: string[] = [];
+
+    for (let hour = startHour; hour < endHour; hour += 1) {
+      const hh = String(hour).padStart(2, '0');
+      hours.push(`${hh}:00`);
+    }
+
+    return hours;
   }
 }

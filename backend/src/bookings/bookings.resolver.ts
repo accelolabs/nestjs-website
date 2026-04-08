@@ -54,4 +54,12 @@ export class BookingsResolver {
   ) {
     return this.bookingsService.findAvailableSeats(clubId, date, startTime);
   }
+
+  @Query(() => [String])
+  availableSlots(
+    @Args('clubId', { type: () => ID }) clubId: string,
+    @Args('date') date: string,
+  ) {
+    return this.bookingsService.findAvailableSlots(clubId, date);
+  }
 }

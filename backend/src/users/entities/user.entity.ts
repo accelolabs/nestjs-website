@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Booking } from "../../bookings/entities/booking.entity";
 import { UserRole } from '../enums/user-role.enum';
@@ -29,6 +29,10 @@ export class User {
     default: UserRole.USER,
   })
   role: UserRole;
+
+  @Field(() => Int)
+  @Column('int', { default: 0 })
+  balance: number;
 
   @Field(() => [Booking], { nullable: true })
   @OneToMany(() => Booking, booking => booking.user)

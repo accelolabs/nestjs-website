@@ -12,6 +12,7 @@ import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     BookingsModule,
     ComputersModule,
     AdditionalsModule,
+    SeedModule,
   ],
   providers: [
     {

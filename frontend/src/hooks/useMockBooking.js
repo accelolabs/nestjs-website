@@ -2,11 +2,11 @@ import { useState } from "react";
 
 export default function useMockBooking() {
   const [booking, setBooking] = useState({
-    club: null,
+    clubId: "",
     date: "",
     startTime: "",
-    hours: 1,
-    seats: []
+    seatIds: [],
+    additionalServiceIds: [],
   });
 
   const updateBooking = data =>

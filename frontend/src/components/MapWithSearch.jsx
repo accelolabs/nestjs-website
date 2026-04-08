@@ -2,7 +2,7 @@ import { useRef, useState, useCallback } from "react";
 import { useYMapsClubs } from "../hooks/useYMapsClubs";
 import ClubCard from "./ClubCard";
 
-export default function MapWithSearch({ selectable = false, onSelectClub }) {
+export default function MapWithSearch({ clubs = [], selectable = false, onSelectClub }) {
   const mapContainer = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedClub, setSelectedClub] = useState(null);
@@ -16,6 +16,7 @@ export default function MapWithSearch({ selectable = false, onSelectClub }) {
 
   const { loaded, filterPlacemarks } = useYMapsClubs(
     mapContainer,
+    clubs,
     {},
     handleSelect
   );

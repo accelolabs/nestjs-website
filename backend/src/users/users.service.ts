@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -20,6 +20,7 @@ export class UsersService {
       email: dto.email,
       password: this.hashPassword(dto.password),
       role: UserRole.USER,
+      balance: 2000,
     });
     return this.repo.save(user);
   }
@@ -55,6 +56,20 @@ export class UsersService {
       throw new NotFoundException(`User ${id} not found`);
     }
     return updated;
+  }
+
+  async topUpBalance(id: string, amount: number) {
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new BadRequestException('Top-up amount must be positive');
+    }
+
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User ${id} not found`);
+    }
+
+    user.balance += Math.trunc(amount);
+    return this.repo.save(user);
   }
 
   hashPassword(password: string) {

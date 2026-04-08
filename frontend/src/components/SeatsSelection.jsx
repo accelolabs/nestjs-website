@@ -26,7 +26,7 @@ export default function SeatsSelection({ club, selectedSeats, onSelect }) {
             onClick={() => toggleSeat(seat)}
             disabled={seat.occupied}
           >
-            {seat.name} - ${seat.price}
+            #{seat.number} - ${seat.price}
           </button>
         );
       })}

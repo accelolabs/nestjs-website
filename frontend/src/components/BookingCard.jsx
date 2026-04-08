@@ -4,7 +4,7 @@ export default function BookingCard({ booking }) {
       <legend className="px-2 font-bold">{booking.club.name}</legend>
 
       <div className="text-sm mb-1">
-        {booking.date} {booking.startTime} · {booking.hours}ч
+        {booking.date} {booking.startTime} · 1ч
       </div>
 
       <div className="text-sm mb-2">
@@ -12,7 +12,7 @@ export default function BookingCard({ booking }) {
         <ul className="list-disc list-inside">
           {booking.seats.map(seat => (
             <li key={seat.id}>
-              Место {seat.id}: {seat.name} (${seat.price})
+              Место {seat.number} (${seat.price})
             </li>
           ))}
         </ul>

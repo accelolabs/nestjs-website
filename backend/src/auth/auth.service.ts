@@ -74,10 +74,18 @@ export class AuthService {
 
     const existing = await this.usersService.findByEmail(finalEmail);
     if (existing) {
+      const normalizedBalance = existing.balance ?? 0;
+      if (normalizedBalance < 2000) {
+        await this.usersService.topUpBalance(existing.id, 2000 - normalizedBalance);
+      }
       if (role && existing.role !== role) {
         return this.usersService.updateRole(existing.id, role);
       }
-      return existing;
+      const refreshedUser = await this.usersService.findOne(existing.id);
+      if (!refreshedUser) {
+        throw new UnauthorizedException('User not found');
+      }
+      return refreshedUser;
     }
 
     const user = await this.usersService.create({

@@ -1,14 +1,17 @@
 import Layout from "../layouts/Layout";
 import MapWithSearch from "../components/MapWithSearch";
+import { useClubsData } from "../hooks/useClubsData";
 
 export default function Landing() {
+  const { clubs } = useClubsData();
+
   return (
     <Layout>
       <div className="container mx-auto p-6 space-y-8">
 
         <div className="bg-base-200 p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Где нас найти?</h2>
-          <MapWithSearch selectable={false} />
+          <MapWithSearch clubs={clubs} selectable={false} />
         </div>
 
         <div className="bg-base-200 p-6 rounded-lg shadow-md">

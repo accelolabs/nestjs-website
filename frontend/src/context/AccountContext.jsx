@@ -1,46 +1,61 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { useAuth } from "./AuthContext";
-
-const AccountContext = createContext(null);
+import { useCallback, useMemo, useState } from "react";
+import { AccountContext } from "./account-context";
+import { useAuth } from "./useAuth";
+import { userBookings } from "../api/bookingApi";
+import { freeMoney } from "../api/authApi";
 
 export function AccountProvider({ children }) {
-  const { user: authUser } = useAuth();
-  const [user, setUser] = useState(authUser);
-  const [balance, setBalance] = useState(12);
+  const { user, token, setUser, refreshMe } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const balance = user?.balance ?? 0;
 
-  useEffect(() => {
-    if (authUser) setUser(authUser);
-  }, [authUser]);
+  const refreshBalance = useCallback(async () => {
+    if (!token) {
+      return 0;
+    }
 
-  const updateUser = data => {
-    setUser(u => ({ ...u, ...data }));
-  };
+    const updatedUser = await refreshMe();
+    return updatedUser?.balance ?? 0;
+  }, [token, refreshMe]);
 
-  const topUp = amount => {
-    if (amount > 0) setBalance(b => b + amount);
-  };
+  const refreshBookings = useCallback(async () => {
+    if (!token) {
+      setBookings([]);
+      return [];
+    }
 
-  const canAfford = price => balance >= price;
+    const data = await userBookings(token);
+    setBookings(data);
+    return data;
+  }, [token]);
 
-  const addBooking = booking => {
-    if (!canAfford(booking.totalPrice)) return false;
-    setBalance(b => b - booking.totalPrice);
-    setBookings(b => [...b, booking]);
+  const topUp = useCallback(async (amount) => {
+    if (!token) throw new Error("Not authenticated");
+    const updatedUser = await freeMoney(token, amount);
+    setUser(updatedUser);
+    return updatedUser.balance ?? 0;
+  }, [token, setUser]);
+
+  const canAfford = useCallback((price) => balance >= price, [balance]);
+
+  const addBooking = useCallback((booking) => {
+    setBookings((b) => [...b, booking]);
     return true;
-  };
+  }, []);
 
-  return (
-    <AccountContext.Provider
-      value={{ user, updateUser, balance, topUp, bookings, addBooking, canAfford }}
-    >
-      {children}
-    </AccountContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      balance,
+      refreshBalance,
+      bookings,
+      topUp,
+      canAfford,
+      addBooking,
+      refreshBookings,
+    }),
+    [user, balance, refreshBalance, bookings, topUp, canAfford, addBooking, refreshBookings],
   );
-}
 
-export function useAccount() {
-  const ctx = useContext(AccountContext);
-  if (!ctx) throw new Error("useAccount must be used inside AccountProvider");
-  return ctx;
+  return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;
 }

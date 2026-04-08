@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { useState } from "react";
 import TuxIcon from "../icons/TuxIcon";
 
@@ -25,6 +25,11 @@ export default function Navbar() {
             <Link to="/booking" className="btn btn-ghost btn-sm">
               Бронирование
             </Link>
+            {user.role === "ADMIN" ? (
+              <Link to="/admin" className="btn btn-ghost btn-sm">
+                Админка
+              </Link>
+            ) : null}
             <button className="btn btn-ghost btn-sm" onClick={logout}>
               Выход
             </button>
@@ -77,6 +82,13 @@ export default function Navbar() {
                     Бронирование
                   </Link>
                 </li>
+                {user.role === "ADMIN" ? (
+                  <li>
+                    <Link to="/admin" onClick={() => setOpen(false)}>
+                      Админка
+                    </Link>
+                  </li>
+                ) : null}
                 <li>
                   <button
                     onClick={() => {

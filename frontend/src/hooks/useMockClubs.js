@@ -18,10 +18,14 @@ function generateSeats() {
     const dist = distributions[Math.floor(Math.random() * distributions.length)];
     const occupied = Math.random() < 0.4;
     seats.push({
-      id: i,
-      name: dist.name,
+      id: `seat-${i}`,
+      number: i,
       price: dist.price,
       occupied,
+      computer: {
+        id: `computer-${i}`,
+        os: dist.name,
+      },
     });
   }
   return seats;
@@ -30,7 +34,7 @@ function generateSeats() {
 export function useMockClubs() {
   const [clubs] = useState(() =>
     itmoAddresses.map((loc, i) => ({
-      id: i + 1,
+      id: `club-${i + 1}`,
       name: loc.name,
       address: loc.address,
       seats: generateSeats()
