@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +19,16 @@ import { BookingAccessDto } from './dto/booking-access.dto';
 
 @Injectable()
 export class BookingsService {
+  private readonly logger = new Logger(BookingsService.name);
+  private readonly outwardApiTimeoutMs = Number(
+    process.env.OUTWARD_API_TIMEOUT_MS ?? 5_000,
+  );
+  private readonly availableSeatsCache = new Map<
+    string,
+    { expiresAt: number; seats: Seat[] }
+  >();
+  private readonly availableSeatsCacheTtlMs = this.resolveCacheTtl();
+
   constructor(
     @InjectRepository(Booking)
     private repo: Repository<Booking>,
@@ -101,6 +112,10 @@ export class BookingsService {
     });
 
     const savedBooking = await this.repo.save(booking);
+
+    this.invalidateAvailableSeatsCache();
+    await this.notifyBookingCreated(savedBooking.id);
+
     return this.findBookingById(savedBooking.id, {
       actorUserId: userId,
       canManageAll: true,
@@ -118,6 +133,7 @@ export class BookingsService {
 
     booking.status = BookingStatus.CANCELLED;
     await this.repo.save(booking);
+    this.invalidateAvailableSeatsCache();
 
     return this.findBookingById(id, {
       actorUserId: access.actorUserId,
@@ -155,6 +171,12 @@ export class BookingsService {
   async findAvailableSeats(clubId: string, date: string, startTime: string) {
     this.assertFutureBookingSlot(date, startTime);
 
+    const cacheKey = this.buildAvailabilityCacheKey(clubId, date, startTime);
+    const cached = this.getCachedAvailableSeats(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const club = await this.clubRepo.findOne({
       where: { id: clubId },
       relations: ['seats', 'seats.computer'],
@@ -169,7 +191,12 @@ export class BookingsService {
       startTime,
     );
 
-    return club.seats.filter((seat) => !conflictingSeatIds.includes(seat.id));
+    const availableSeats = club.seats.filter(
+      (seat) => !conflictingSeatIds.includes(seat.id),
+    );
+    this.setCachedAvailableSeats(cacheKey, availableSeats);
+
+    return availableSeats;
   }
 
   private async ensureUserExists(userId: string) {
@@ -238,5 +265,88 @@ export class BookingsService {
       .getRawMany<{ seatId: string }>();
 
     return rows.map((row) => row.seatId);
+  }
+
+  private buildAvailabilityCacheKey(
+    clubId: string,
+    date: string,
+    startTime: string,
+  ) {
+    return `${clubId}:${date}:${startTime}`;
+  }
+
+  private getCachedAvailableSeats(key: string) {
+    const record = this.availableSeatsCache.get(key);
+    if (!record) {
+      return null;
+    }
+
+    if (record.expiresAt <= Date.now()) {
+      this.availableSeatsCache.delete(key);
+      return null;
+    }
+
+    return record.seats;
+  }
+
+  private setCachedAvailableSeats(key: string, seats: Seat[]) {
+    this.availableSeatsCache.set(key, {
+      seats,
+      expiresAt: Date.now() + this.availableSeatsCacheTtlMs,
+    });
+  }
+
+  private invalidateAvailableSeatsCache() {
+    this.availableSeatsCache.clear();
+  }
+
+  private async notifyBookingCreated(bookingId: string) {
+    const outwardApiUrl = process.env.OUTWARD_API_URL;
+    if (!outwardApiUrl) {
+      return;
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(
+        () => controller.abort(),
+        this.outwardApiTimeoutMs,
+      );
+      let response: Response;
+      try {
+        response = await fetch(outwardApiUrl, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            event: 'BOOKING_CREATED',
+            bookingId,
+            createdAt: new Date().toISOString(),
+          }),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      if (!response.ok) {
+        this.logger.warn(
+          `Outward API responded with ${response.status} for booking ${bookingId}`,
+        );
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Outward API call failed for booking ${bookingId}: ${String(error)}`,
+      );
+    }
+  }
+
+  private resolveCacheTtl() {
+    const ttl = Number(process.env.AVAILABLE_SEATS_CACHE_TTL_MS ?? 30_000);
+    if (!Number.isFinite(ttl) || ttl <= 0) {
+      return 30_000;
+    }
+    return ttl;
   }
 }

@@ -7,6 +7,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from './gql-auth.guard';
 import { CurrentUser } from './current-user.decorator';
 import type { JwtUser } from './interfaces/jwt-user.interface';
+import { UserRole } from 'src/users/enums/user-role.enum';
 
 @Resolver()
 export class AuthResolver {
@@ -22,8 +23,9 @@ export class AuthResolver {
     @Args('username', { nullable: true }) username?: string,
     @Args('email', { nullable: true }) email?: string,
     @Args('password', { nullable: true }) password?: string,
+    @Args('role', { type: () => UserRole, nullable: true }) role?: UserRole,
   ) {
-    return this.authService.registerDummy(username, email, password);
+    return this.authService.registerDummy(username, email, password, role);
   }
 
   @UseGuards(GqlAuthGuard)

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -48,7 +49,21 @@ export class AuthService {
     username?: string,
     email?: string,
     password?: string,
+    role?: UserRole,
   ): Promise<User> {
+    const allowDummyRegister =
+      process.env.ALLOW_DUMMY_REGISTER === 'true' || process.env.NODE_ENV !== 'production';
+    if (!allowDummyRegister) {
+      throw new ForbiddenException('Dummy registration is disabled');
+    }
+
+    const allowDummyAdmin = process.env.ALLOW_DUMMY_ADMIN === 'true';
+    if (role && role !== UserRole.USER && !allowDummyAdmin) {
+      throw new ForbiddenException(
+        'Admin role assignment via registerDummy is disabled',
+      );
+    }
+
     const finalUsername = username ?? 'demo';
     const finalEmail = email ?? 'demo@local.test';
     const finalPassword = password ?? 'demo123';
@@ -59,6 +74,9 @@ export class AuthService {
 
     const existing = await this.usersService.findByEmail(finalEmail);
     if (existing) {
+      if (role && existing.role !== role) {
+        return this.usersService.updateRole(existing.id, role);
+      }
       return existing;
     }
 
@@ -68,8 +86,9 @@ export class AuthService {
       password: finalPassword,
     });
 
-    if (!user.role) {
-      user.role = UserRole.USER;
+    if (role && role !== UserRole.USER) {
+      user.role = role;
+      return this.usersService.updateRole(user.id, role);
     }
 
     return user;

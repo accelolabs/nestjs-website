@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -46,6 +46,15 @@ export class UsersService {
 
   remove(id: string) {
     return this.repo.delete(id);
+  }
+
+  async updateRole(id: string, role: UserRole) {
+    await this.repo.update(id, { role });
+    const updated = await this.findOne(id);
+    if (!updated) {
+      throw new NotFoundException(`User ${id} not found`);
+    }
+    return updated;
   }
 
   hashPassword(password: string) {
