@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../layouts/Layout";
 import ClubSelectionCard from "../components/ClubSelectionCard";
@@ -13,6 +13,7 @@ import {
   createBooking as createBookingRequest,
 } from "../api/bookingApi";
 import { useClubsData } from "../hooks/useClubsData";
+import { additionalServices as fetchAdditionalServices } from "../api/catalogApi";
 
 function SummaryCard({ totalPrice, balance }) {
   return (
@@ -42,18 +43,31 @@ export default function Booking() {
   const [availableSeatIds, setAvailableSeatIds] = useState([]);
   const [freeSlots, setFreeSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [services, setServices] = useState([]);
+  const [selectedServiceIds, setSelectedServiceIds] = useState([]);
   const navigate = useNavigate();
 
-  const totalPrice = selectedSeats.reduce((sum, seatId) => {
+  const seatsPrice = selectedSeats.reduce((sum, seatId) => {
     const seat = selectedClub?.seats.find((s) => s.id === seatId);
     return seat ? sum + seat.price : sum;
   }, 0);
+  const servicesPrice = services
+    .filter((service) => selectedServiceIds.includes(service.id))
+    .reduce((sum, service) => sum + service.price, 0);
+  const totalPrice = seatsPrice + servicesPrice;
+
+  useEffect(() => {
+    fetchAdditionalServices()
+      .then((data) => setServices(data ?? []))
+      .catch(() => setServices([]));
+  }, []);
 
   const handleSelectClub = (club) => {
     setSelectedClub(club);
     setSelectedSeats([]);
     setAvailableSeatIds([]);
     setFreeSlots([]);
+    setSelectedServiceIds([]);
     updateBooking({ clubId: club.id, seatIds: [] });
   };
 
@@ -127,7 +141,7 @@ export default function Booking() {
     const input = {
       clubId: selectedClub.id,
       seatIds: selectedSeats,
-      additionalServiceIds: booking.additionalServiceIds,
+      additionalServiceIds: selectedServiceIds,
       date: booking.date,
       startTime: booking.startTime,
     };
@@ -208,6 +222,35 @@ export default function Booking() {
             </div>
 
             <SummaryCard totalPrice={totalPrice} balance={balance} />
+            {services.length > 0 ? (
+              <div className="card bg-base-200 p-4">
+                <h3 className="font-semibold mb-3">Дополнительные услуги</h3>
+                <div className="grid gap-2">
+                  {services.map((service) => {
+                    const checked = selectedServiceIds.includes(service.id);
+                    return (
+                      <label key={service.id} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-sm"
+                          checked={checked}
+                          onChange={() => {
+                            const next = checked
+                              ? selectedServiceIds.filter((id) => id !== service.id)
+                              : [...selectedServiceIds, service.id];
+                            setSelectedServiceIds(next);
+                            updateBooking({ additionalServiceIds: next });
+                          }}
+                        />
+                        <span>
+                          {service.name} (+${service.price})
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
             {error ? <p className="text-error">{error}</p> : null}
 
             <button

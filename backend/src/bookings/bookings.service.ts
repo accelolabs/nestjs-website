@@ -224,7 +224,7 @@ export class BookingsService {
     const seatIds = club.seats.map((seat) => seat.id);
 
     for (const startTime of slotHours) {
-      const slotDate = new Date(`${date}T${startTime}:00`);
+      const slotDate = this.parseSlotDate(date, startTime);
       if (Number.isNaN(slotDate.getTime()) || slotDate <= now) {
         continue;
       }
@@ -274,7 +274,7 @@ export class BookingsService {
   }
 
   private assertFutureBookingSlot(date: string, startTime: string) {
-    const bookingDate = new Date(`${date}T${startTime}:00`);
+    const bookingDate = this.parseSlotDate(date, startTime);
     if (Number.isNaN(bookingDate.getTime())) {
       throw new BadRequestException('Invalid booking date or time');
     }
@@ -285,10 +285,24 @@ export class BookingsService {
   }
 
   private assertValidDate(date: string) {
-    const parsedDate = new Date(`${date}T00:00:00`);
+    const [year, month, day] = date.split('-').map((value) => Number(value));
+    const parsedDate = new Date(year, (month ?? 1) - 1, day ?? 1);
     if (Number.isNaN(parsedDate.getTime())) {
       throw new BadRequestException('Invalid booking date');
     }
+  }
+
+  private parseSlotDate(date: string, startTime: string) {
+    const [year, month, day] = date.split('-').map((value) => Number(value));
+    const [hours, minutes] = startTime.split(':').map((value) => Number(value));
+    return new Date(
+      year,
+      (month ?? 1) - 1,
+      day ?? 1,
+      hours ?? 0,
+      minutes ?? 0,
+      0,
+    );
   }
 
   private uniqueIds(ids?: string[]) {

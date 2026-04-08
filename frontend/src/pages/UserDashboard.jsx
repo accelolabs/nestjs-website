@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../layouts/Layout";
 import { useAccount } from "../context/useAccount";
+import { useAuth } from "../context/useAuth";
+import { cancelBooking } from "../api/bookingApi";
 
 import UserInfoCard from "../components/UserInfoCard";
 import PasswordCard from "../components/PasswordCard";
@@ -9,6 +11,8 @@ import BookingCard from "../components/BookingCard";
 
 export default function UserDashboard() {
   const { user, balance, bookings, topUp, refreshBookings, refreshBalance } = useAccount();
+  const { token } = useAuth();
+  const [cancellingId, setCancellingId] = useState("");
 
   useEffect(() => {
     refreshBookings().catch(() => {
@@ -19,6 +23,18 @@ export default function UserDashboard() {
     });
   }, [refreshBookings, refreshBalance]);
 
+  const handleCancel = async (bookingId) => {
+    if (!token) return;
+    try {
+      setCancellingId(bookingId);
+      await cancelBooking(bookingId, token);
+      await refreshBookings();
+      await refreshBalance();
+    } finally {
+      setCancellingId("");
+    }
+  };
+
   return (
     <Layout>
       <div className="container mx-auto p-6">
@@ -27,7 +43,12 @@ export default function UserDashboard() {
         <h2 className="text-2xl font-bold mb-4">Активные брони</h2>
         <div className="flex flex-wrap gap-4 mb-6">
           {bookings.map((b) => (
-            <BookingCard key={b.id} booking={b} />
+            <BookingCard
+              key={b.id}
+              booking={b}
+              onCancel={handleCancel}
+              cancelling={cancellingId === b.id}
+            />
           ))}
         </div>
 

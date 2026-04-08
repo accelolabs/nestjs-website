@@ -10,13 +10,15 @@ import UserDashboard from "./pages/UserDashboard";
 import AdminPanel from "./pages/AdminPanel";
 
 function PrivateRoute({ children }) {
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
+  if (authLoading) return <div className="p-6">Loading session...</div>;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }
 
 function AdminRoute({ children }) {
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
+  if (authLoading) return <div className="p-6">Loading session...</div>;
   if (!user) return <Navigate to="/login" replace />;
   if (user.role !== "ADMIN") return <Navigate to="/dashboard" replace />;
   return children;
