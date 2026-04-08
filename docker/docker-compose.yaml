@@ -19,9 +19,13 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: clubs
+      TYPEORM_SYNC: ${TYPEORM_SYNC:-true}
+      TYPEORM_DROP_SCHEMA: ${TYPEORM_DROP_SCHEMA:-false}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
       JWT_SECRET: dev-secret-change-me
       JWT_EXPIRES_IN: 7d
       ALLOW_DUMMY_REGISTER: "true"
@@ -42,7 +46,7 @@ services:
       context: ../frontend
       dockerfile: docker/Dockerfile
       args:
-        VITE_GRAPHQL_URL: http://localhost:12000/graphql
+        VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL:-http://localhost:12000/graphql}
         VITE_BASE_PATH: /
     restart: unless-stopped
     depends_on:
