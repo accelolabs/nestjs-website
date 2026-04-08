@@ -48,6 +48,7 @@ services:
       args:
         VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL:-/graphql}
         VITE_BASE_PATH: /
+        VITE_YMAPS_API_KEY: ${VITE_YMAPS_API_KEY:-7220b34d-c5b5-4211-8034-0063d1473c72}
     restart: unless-stopped
     depends_on:
       - api

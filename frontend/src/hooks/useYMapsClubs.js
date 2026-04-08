@@ -70,7 +70,12 @@ export function useYMapsClubs(mapContainerRef, clubs = [], options = {}, onSelec
       if (!script) {
         script = document.createElement("script");
         script.id = YMAPS_SCRIPT_ID;
-        script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${import.meta.env.VITE_YMAPS_API_KEY}`;
+        const params = new URLSearchParams({ lang: "ru_RU" });
+        const ymapsKey = import.meta.env.VITE_YMAPS_API_KEY;
+        if (ymapsKey) {
+          params.set("apikey", ymapsKey);
+        }
+        script.src = `https://api-maps.yandex.ru/2.1/?${params.toString()}`;
         script.async = true;
         document.body.appendChild(script);
       }
