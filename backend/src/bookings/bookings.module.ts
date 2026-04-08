@@ -6,10 +6,11 @@ import { User } from 'src/users/entities/user.entity';
 import { AdditionalService } from 'src/additionals/entities/additional.entity';
 import { Seat } from 'src/seats/entities/seat.entity';
 import { Club } from 'src/clubs/entities/club.entity';
+import { BookingsResolver } from './bookings.resolver';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Booking, User, Club, Seat, AdditionalService])],
-  providers: [BookingsService],
+  providers: [BookingsService, BookingsResolver],
   exports: [BookingsService],
 })
 export class BookingsModule {}

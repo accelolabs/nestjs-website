@@ -1,0 +1,139 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Computer {
+  id: ID!
+  cpu: String!
+  ram: String!
+  gpu: String!
+  os: String!
+  seat: Seat
+}
+
+type Seat {
+  id: ID!
+  number: Int!
+  price: Int!
+  club: Club
+  computer: Computer
+}
+
+type Club {
+  id: ID!
+  name: String!
+  address: String!
+  seats: [Seat!]
+  bookings: [Booking!]
+}
+
+type AdditionalService {
+  id: ID!
+  name: String!
+  description: String!
+  price: Int!
+  bookings: [Booking!]
+}
+
+type Booking {
+  id: ID!
+  user: User!
+  club: Club!
+  date: String!
+  startTime: String!
+  status: BookingStatus!
+  totalPrice: Int!
+  seats: [Seat!]!
+  additionalServices: [AdditionalService!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  role: UserRole!
+  bookings: [Booking!]
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+type Query {
+  user(id: ID!): User
+  users: [User!]!
+  clubs: [Club!]!
+  club(id: ID!): Club
+  seats: [Seat!]!
+  seat(id: ID!): Seat
+  booking(id: ID!, actorUserId: ID!, canManageAll: Boolean): Booking
+  userBookings(userId: ID!): [Booking!]!
+  availableSeats(clubId: ID!, date: String!, startTime: String!): [Seat!]!
+  computers: [Computer!]!
+  computer(id: ID!): Computer
+  additionalServices: [AdditionalService!]!
+}
+
+type Mutation {
+  createUser(input: CreateUserDto!): User!
+  createClub(input: CreateClubDto!): Club!
+  createSeat(input: CreateSeatDto!): Seat!
+  createBooking(userId: ID!, input: CreateBookingDto!): Booking!
+  cancelBooking(id: ID!, actorUserId: ID!, canManageAll: Boolean): Booking!
+  createComputer(input: CreateComputerDto!): Computer!
+  createAdditionalService(input: CreateAdditionalDto!): AdditionalService!
+}
+
+input CreateUserDto {
+  username: String!
+  email: String!
+  password: String!
+}
+
+input CreateClubDto {
+  name: String!
+  address: String!
+}
+
+input CreateSeatDto {
+  number: Int!
+  price: Int!
+  occupied: Boolean
+  clubId: ID
+  computerId: ID
+}
+
+input CreateBookingDto {
+  clubId: ID!
+  seatIds: [ID!]!
+  additionalServiceIds: [ID!]
+  date: String!
+  startTime: String!
+}
+
+input CreateComputerDto {
+  cpu: String!
+  ram: String!
+  gpu: String!
+  os: String!
+  seatId: ID
+}
+
+input CreateAdditionalDto {
+  name: String!
+  description: String!
+  price: Int!
+}

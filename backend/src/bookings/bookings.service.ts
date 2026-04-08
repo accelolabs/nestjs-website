@@ -31,7 +31,7 @@ export class BookingsService {
     private additionalRepo: Repository<AdditionalService>,
   ) {}
 
-  async createBooking(userId: number, dto: CreateBookingDto) {
+  async createBooking(userId: string, dto: CreateBookingDto) {
     this.assertFutureBookingSlot(dto.date, dto.startTime);
 
     const user = await this.userRepo.findOneBy({ id: userId });
@@ -107,7 +107,7 @@ export class BookingsService {
     });
   }
 
-  async cancelBooking(id: number, access: BookingAccessDto) {
+  async cancelBooking(id: string, access: BookingAccessDto) {
     const booking = await this.findBookingById(id, access);
 
     if (booking.status === BookingStatus.CANCELLED) {
@@ -125,7 +125,7 @@ export class BookingsService {
     });
   }
 
-  async findBookingById(id: number, access: BookingAccessDto) {
+  async findBookingById(id: string, access: BookingAccessDto) {
     const booking = await this.repo.findOne({
       where: { id },
       relations: ['user', 'club', 'seats', 'seats.club', 'seats.computer', 'additionalServices'],
@@ -139,7 +139,7 @@ export class BookingsService {
     return booking;
   }
 
-  async findUserBookings(userId: number) {
+  async findUserBookings(userId: string) {
     await this.ensureUserExists(userId);
 
     return this.repo.find({
@@ -152,7 +152,7 @@ export class BookingsService {
     });
   }
 
-  async findAvailableSeats(clubId: number, date: string, startTime: string) {
+  async findAvailableSeats(clubId: string, date: string, startTime: string) {
     this.assertFutureBookingSlot(date, startTime);
 
     const club = await this.clubRepo.findOne({
@@ -172,7 +172,7 @@ export class BookingsService {
     return club.seats.filter((seat) => !conflictingSeatIds.includes(seat.id));
   }
 
-  private async ensureUserExists(userId: number) {
+  private async ensureUserExists(userId: string) {
     const user = await this.userRepo.findOneBy({ id: userId });
     if (!user) {
       throw new NotFoundException(`User ${userId} not found`);
@@ -213,12 +213,12 @@ export class BookingsService {
     }
   }
 
-  private uniqueIds(ids?: number[]) {
+  private uniqueIds(ids?: string[]) {
     return [...new Set(ids ?? [])];
   }
 
   private async findConflictingSeatIds(
-    seatIds: number[],
+    seatIds: string[],
     date: string,
     startTime: string,
   ) {
@@ -237,6 +237,6 @@ export class BookingsService {
       .distinct(true)
       .getRawMany<{ seatId: string }>();
 
-    return rows.map((row) => Number(row.seatId));
+    return rows.map((row) => row.seatId);
   }
 }

@@ -21,18 +21,18 @@ export class AdditionalsService {
     return this.repo.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.repo.findOne({
       where: { id },
       relations: ['bookings'],
     });
   }
 
-  update(id: number, dto: UpdateAdditionalDto) {
+  update(id: string, dto: UpdateAdditionalDto) {
     return this.repo.update(id, dto);
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.repo.delete(id);
   }
 }

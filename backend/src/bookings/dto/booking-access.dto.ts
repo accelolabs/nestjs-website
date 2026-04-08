@@ -1,4 +1,4 @@
 export class BookingAccessDto {
-  actorUserId: number;
+  actorUserId: string;
   canManageAll?: boolean;
 }

@@ -24,15 +24,15 @@ export class ClubsService {
     return this.repo.find({ relations: ['seats', 'bookings'] });
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.repo.findOne({ where: { id }, relations: ['seats', 'bookings'] });
   }
 
-  update(id: number, dto: UpdateClubDto) {
+  update(id: string, dto: UpdateClubDto) {
     return this.repo.update(id, dto);
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.repo.delete(id);
   }
 }

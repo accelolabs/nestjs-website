@@ -42,11 +42,11 @@ export class SeatsService {
     return this.repo.find({ relations: ['club', 'computer'] });
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.repo.findOne({ where: { id }, relations: ['club', 'computer'] });
   }
 
-  async update(id: number, dto: UpdateSeatDto) {
+  async update(id: string, dto: UpdateSeatDto) {
     if (dto.clubId) {
       const club = await this.clubRepo.findOneBy({ id: dto.clubId });
       if (club) dto['club'] = club;
@@ -60,7 +60,7 @@ export class SeatsService {
     return this.repo.update(id, dto);
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.repo.delete(id);
   }
 }
