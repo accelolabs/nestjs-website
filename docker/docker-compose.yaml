@@ -46,7 +46,7 @@ services:
       context: ../frontend
       dockerfile: docker/Dockerfile
       args:
-        VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL:-http://localhost:12000/graphql}
+        VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL:-/graphql}
         VITE_BASE_PATH: /
     restart: unless-stopped
     depends_on:

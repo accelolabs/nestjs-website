@@ -1,6 +1,6 @@
 const GRAPHQL_URL =
   import.meta.env.VITE_GRAPHQL_URL ||
-  `${window.location.protocol}//${window.location.hostname}:12000/graphql`;
+  `${window.location.origin}/graphql`;
 
 export async function graphqlRequest(query, variables = {}, token) {
   const response = await fetch(GRAPHQL_URL, {
