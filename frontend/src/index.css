@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: night;
+}
+
+/* применяет темное затемнение к канвасам тайлов подложки */
+.ymap-dark .ymaps-2-1-2-layer-pane {
+  filter: brightness(40%) contrast(1.2) !important;
+}
+
+/* отключает фильтр для маркеров и интерфейса */
+.ymap-dark .ymaps-2-1-2-placemark,
+.ymap-dark .ymaps-2-1-2-controls {
+  filter: none !important;
+}
